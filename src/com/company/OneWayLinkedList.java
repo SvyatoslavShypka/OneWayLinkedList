@@ -5,10 +5,17 @@ import java.util.NoSuchElementException;
 
 public class OneWayLinkedList<T> implements IList<T> {
 
-    private class Element{
+    Element head = null;
+
+    public class Element{
 
         private T value;
         private Element next;
+
+        Element(T data){
+            this.value = data;
+            this.next = null;
+        }
 
         public T getValue() {
             return value;
@@ -25,16 +32,7 @@ public class OneWayLinkedList<T> implements IList<T> {
         public void setNext(Element next) {
             this.next = next;
         }
-
-
-
-        Element(T data){
-            this.value = data;
-            this.next = null;
-        }
     }
-
-    Element head = null;
 
     @Override
     public void add(T value) {
@@ -53,7 +51,27 @@ public class OneWayLinkedList<T> implements IList<T> {
 
     @Override
     public void addAt(int index, T value) throws NoSuchElementException {
-        // TODO
+        Element newElement = new Element(value);
+        if (index == 0) {
+            newElement.setNext(head);
+            head = newElement;
+        }
+        else {
+            Element previousElement = head;
+            Element actElem = head;
+            while (index > 0 && actElem != null) {
+                index--;
+                previousElement = actElem;
+                actElem = actElem.getNext();
+            }
+            if (actElem == null) {
+                throw new NoSuchElementException();
+            } else {
+                previousElement.setNext(newElement);
+                newElement.setNext(actElem);
+            }
+        }
+
     }
 
     @Override
@@ -73,7 +91,12 @@ public class OneWayLinkedList<T> implements IList<T> {
             index--;
             actElem = actElem.getNext();
         }
-        return actElem.getValue();
+        if(actElem == null) {
+            throw new NoSuchElementException();
+        }
+        else {
+            return actElem.getValue();
+        }
     }
 
     @Override
@@ -112,15 +135,44 @@ public class OneWayLinkedList<T> implements IList<T> {
 
     @Override
     public T removeAt(int index) throws NoSuchElementException {
-        // TODO
-        T x = (T) new Object();
-        return x;
+        if(head == null) throw new NoSuchElementException();
+        T result;
+        if(index == 0) {
+            result = head.getValue();
+            head = head.getNext();
+            return result;
+        }
+        Element actElem = head;
+        Element previous = head;
+        while(index > 0 && actElem.getNext() != null) {
+            index--;
+            previous = actElem;
+            actElem = actElem.getNext();
+        }
+        if(index != 0) {
+            throw new NoSuchElementException();
+        }
+        result = actElem.getValue();
+        previous.setNext(actElem.getNext());
+        return result;
     }
 
     @Override
     public boolean remove(T value) {
-        // TODO
-        return true;
+            if(head == null) return false;
+            if(head.getValue().equals(value)){
+                head=head.getNext();
+                return true;
+            }
+            Element actElem = head;
+            while(actElem.getNext() != null && !actElem.getNext().getValue().equals(value)) {
+                actElem = actElem.getNext();
+            }
+            if(actElem.getNext() == null) {
+                return false;
+            }
+            actElem.setNext(actElem.getNext().getNext());
+            return true;
     }
 
     @Override
@@ -150,13 +202,15 @@ public class OneWayLinkedList<T> implements IList<T> {
 
         @Override
         public boolean hasNext() {
-            if (actElem == null) return false;
-            return this.actElem.getNext() != null;
+//            if (actElem == null) return false;
+//            return actElem.getNext() != null;
+            return actElem != null;
         }
 
         @Override
         public T next() {
-            T currentValue = (T) actElem.getValue();
+            if (hasNext() == false) throw new NoSuchElementException();
+            T currentValue = actElem.getValue();
             actElem = actElem.getNext();
             return currentValue;
         }
